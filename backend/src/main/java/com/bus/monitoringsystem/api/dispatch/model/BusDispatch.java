@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "bus_dispatches")
+@Table(name = "bus_dispatches", indexes = @Index(columnList = "operation_ended_at, bus_id, route_id, direction"))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BusDispatch {

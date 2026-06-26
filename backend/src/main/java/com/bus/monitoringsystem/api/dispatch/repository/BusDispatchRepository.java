@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface BusDispatchRepository extends JpaRepository<BusDispatch, Long> {
 
-    @Query("SELECT d FROM BusDispatch d JOIN FETCH d.route JOIN FETCH d.bus WHERE d.operationEndedAt IS NULL")
+    @Query("SELECT d FROM BusDispatch d JOIN FETCH d.route WHERE d.operationEndedAt IS NULL")
     List<BusDispatch> findAllActiveWithRoute();
 }
