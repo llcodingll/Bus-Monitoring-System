@@ -23,4 +23,12 @@ public class EventService {
                 event -> EventSummaryResponse.from(EventSummaryResult.from(event))
         );
     }
+
+    public PageResponse<EventSummaryResponse> findRecentEventsByBusId(Long busId, int page, int size) {
+
+        return PageResponse.from(
+                eventRepository.findAllByBusIdWithBusAndRoute(busId, PageRequest.of(page, size)),
+                event -> EventSummaryResponse.from(EventSummaryResult.from(event))
+        );
+    }
 }

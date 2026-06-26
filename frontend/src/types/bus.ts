@@ -38,3 +38,19 @@ export interface BusSummary {
   currentLatitude: number
   currentLongitude: number
 }
+
+export interface BusDetail {
+  id: number
+  busNumber: string
+  routeNumber: string | null
+  routeName: string | null
+  currentSpeed: number
+  status: BusStatus
+  lastCommunicationAt: string | null
+  currentStopName: string | null
+  nextStopName: string | null
+  direction: Direction | null
+  operationStartedAt: string | null
+  currentLatitude: number | null
+  currentLongitude: number | null
+}

@@ -1,8 +1,8 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { fetchBuses } from '@/api/buses'
+import { fetchBuses, fetchBusDetail, fetchBusEvents } from '@/api/buses'
 import { triggerSeed } from '@/api/seed'
-import type { BusSummary } from '@/types/bus'
+import type { BusSummary, BusDetail, EventSummary } from '@/types/bus'
 
 export const useBusStore = defineStore('bus', () => {
 
@@ -10,6 +10,16 @@ export const useBusStore = defineStore('bus', () => {
   const loading = ref(false)
   const seeding = ref(false)
   const error = ref<string | null>(null)
+
+  const currentBus = ref<BusDetail | null>(null)
+  const currentBusLoading = ref(false)
+  const currentBusError = ref<string | null>(null)
+
+  const currentBusEvents = ref<EventSummary[]>([])
+  const currentBusEventsPage = ref(0)
+  const currentBusEventsTotalPages = ref(0)
+  const currentBusEventsTotalElements = ref(0)
+  const currentBusEventsLoading = ref(false)
 
   const onlineCount = computed(() => buses.value.filter(b => b.status === 'ONLINE').length)
   const offlineCount = computed(() => buses.value.filter(b => b.status === 'OFFLINE').length)
@@ -27,6 +37,35 @@ export const useBusStore = defineStore('bus', () => {
     }
   }
 
+  async function loadBusDetail(id: number): Promise<void> {
+
+    currentBusLoading.value = true
+    currentBusError.value = null
+    try {
+      currentBus.value = await fetchBusDetail(id)
+    } catch (e) {
+      currentBusError.value = e instanceof Error ? e.message : '버스 정보를 불러오지 못했습니다.'
+    } finally {
+      currentBusLoading.value = false
+    }
+  }
+
+  async function loadBusEvents(busId: number, page = 0): Promise<void> {
+
+    currentBusEventsLoading.value = true
+    try {
+      const result = await fetchBusEvents(busId, page)
+      currentBusEvents.value = result.content
+      currentBusEventsPage.value = result.currentPage
+      currentBusEventsTotalPages.value = result.totalPages
+      currentBusEventsTotalElements.value = result.totalElements
+    } catch {
+      currentBusEvents.value = []
+    } finally {
+      currentBusEventsLoading.value = false
+    }
+  }
+
   async function seedData(): Promise<void> {
 
     seeding.value = true
@@ -41,5 +80,11 @@ export const useBusStore = defineStore('bus', () => {
     }
   }
 
-  return { buses, loading, seeding, error, onlineCount, offlineCount, loadBuses, seedData }
+  return {
+    buses, loading, seeding, error, onlineCount, offlineCount,
+    currentBus, currentBusLoading, currentBusError,
+    currentBusEvents, currentBusEventsPage, currentBusEventsTotalPages,
+    currentBusEventsTotalElements, currentBusEventsLoading,
+    loadBuses, loadBusDetail, loadBusEvents, seedData,
+  }
 })
