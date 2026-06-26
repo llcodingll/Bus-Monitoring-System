@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import type { BusSummary } from '@/types/bus'
 
-defineProps<{
+const props = defineProps<{
   bus: BusSummary
   selected?: boolean
 }>()
@@ -10,6 +11,12 @@ defineProps<{
 const emit = defineEmits<{
   select: [id: number]
 }>()
+
+const router = useRouter()
+
+function navigateToDetail(): void {
+  router.push(`/buses/${props.bus.id}`)
+}
 
 function formatLastSeen(isoString: string): string {
   const diff = Math.floor((Date.now() - new Date(isoString).getTime()) / 1000)
@@ -23,7 +30,7 @@ function formatLastSeen(isoString: string): string {
   <div
     class="rounded-card bg-card p-4 shadow-card cursor-pointer transition-all duration-150 select-none"
     :class="selected ? 'ring-2 ring-apple-blue shadow-md' : 'hover:shadow-md hover:-translate-y-px'"
-    @click="emit('select', bus.id)"
+    @click="navigateToDetail"
   >
     <div class="flex items-start justify-between gap-2">
       <div class="min-w-0">
