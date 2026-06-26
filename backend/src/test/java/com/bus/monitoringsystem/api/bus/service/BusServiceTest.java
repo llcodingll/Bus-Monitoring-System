@@ -1,12 +1,16 @@
 package com.bus.monitoringsystem.api.bus.service;
 
 import com.bus.monitoringsystem.api.bus.dto.response.BusDetailResponse;
+import com.bus.monitoringsystem.api.bus.dto.response.BusPathPointResponse;
+import com.bus.monitoringsystem.api.bus.dto.response.BusSummaryResponse;
 import com.bus.monitoringsystem.api.bus.model.Bus;
 import com.bus.monitoringsystem.api.bus.model.BusStatus;
 import com.bus.monitoringsystem.api.bus.policy.OnlineStatusPolicy;
 import com.bus.monitoringsystem.api.bus.repository.BusRepository;
 import com.bus.monitoringsystem.api.dispatch.model.BusDispatch;
 import com.bus.monitoringsystem.api.dispatch.repository.BusDispatchRepository;
+import com.bus.monitoringsystem.api.gps.model.GpsLocation;
+import com.bus.monitoringsystem.api.gps.repository.GpsLocationRepository;
 import com.bus.monitoringsystem.api.route.model.Route;
 import com.bus.monitoringsystem.api.routestop.model.Direction;
 import com.bus.monitoringsystem.api.stop.model.Stop;
@@ -45,7 +49,53 @@ class BusServiceTest {
     private BusDispatchRepository busDispatchRepository;
 
     @Mock
+    private GpsLocationRepository gpsLocationRepository;
+
+    @Mock
     private OnlineStatusPolicy onlineStatusPolicy;
+
+    @Test
+    @DisplayName("버스 목록을 조회하면 전체 버스 요약 정보를 반환한다")
+    void findAllBusSummaries_returnsListOfSummaries() {
+
+        // given
+        Bus bus = mock(Bus.class);
+        given(bus.getId()).willReturn(1L);
+        given(bus.getBusNumber()).willReturn("143-1");
+        given(bus.getCurrentSpeed()).willReturn(40);
+        given(bus.getLastCommunicationAt()).willReturn(null);
+        given(bus.getCurrentStop()).willReturn(null);
+        given(bus.getNextStop()).willReturn(null);
+        given(bus.getCurrentLatitude()).willReturn(null);
+        given(bus.getCurrentLongitude()).willReturn(null);
+
+        given(busRepository.findAllWithStops()).willReturn(List.of(bus));
+        given(busDispatchRepository.findAllActiveWithRoute()).willReturn(List.of());
+        given(onlineStatusPolicy.resolve(any(), any())).willReturn(BusStatus.OFFLINE);
+
+        // when
+        List<BusSummaryResponse> result = busService.findAllBusSummaries();
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getBusNumber()).isEqualTo("143-1");
+        assertThat(result.get(0).getStatus()).isEqualTo("OFFLINE");
+    }
+
+    @Test
+    @DisplayName("버스가 없으면 빈 목록을 반환한다")
+    void findAllBusSummaries_returnsEmptyList_whenNoBuses() {
+
+        // given
+        given(busRepository.findAllWithStops()).willReturn(List.of());
+        given(busDispatchRepository.findAllActiveWithRoute()).willReturn(List.of());
+
+        // when
+        List<BusSummaryResponse> result = busService.findAllBusSummaries();
+
+        // then
+        assertThat(result).isEmpty();
+    }
 
     @Test
     @DisplayName("유효한 버스 ID로 상세 조회하면 BusDetailResponse를 반환한다")
@@ -134,5 +184,40 @@ class BusServiceTest {
         assertThat(result.getRouteName()).isNull();
         assertThat(result.getDirection()).isNull();
         assertThat(result.getOperationStartedAt()).isNull();
+    }
+
+    @Test
+    @DisplayName("버스 GPS 경로를 조회하면 최근 이력을 반환한다")
+    void findBusPath_returnsPathPoints_whenGpsExists() {
+
+        // given
+        GpsLocation gps = mock(GpsLocation.class);
+        given(gps.getLatitude()).willReturn(new BigDecimal("37.5665"));
+        given(gps.getLongitude()).willReturn(new BigDecimal("126.9780"));
+        given(gps.getRecordedAt()).willReturn(LocalDateTime.now());
+
+        given(gpsLocationRepository.findTop50ByBusIdOrderByRecordedAtDesc(1L)).willReturn(List.of(gps));
+
+        // when
+        List<BusPathPointResponse> result = busService.findBusPath(1L);
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getLatitude()).isEqualByComparingTo("37.5665");
+        assertThat(result.get(0).getLongitude()).isEqualByComparingTo("126.9780");
+    }
+
+    @Test
+    @DisplayName("GPS 이력이 없으면 빈 목록을 반환한다")
+    void findBusPath_returnsEmptyList_whenNoGps() {
+
+        // given
+        given(gpsLocationRepository.findTop50ByBusIdOrderByRecordedAtDesc(1L)).willReturn(List.of());
+
+        // when
+        List<BusPathPointResponse> result = busService.findBusPath(1L);
+
+        // then
+        assertThat(result).isEmpty();
     }
 }
