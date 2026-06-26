@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BaseResponse<T> {
 
-    private boolean isSuccess;
+    private Boolean isSuccess;
     private int code;
     private String message;
     private T result;
