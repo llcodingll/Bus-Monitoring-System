@@ -21,7 +21,7 @@ export interface BusSummary {
   lastCommunicationAt: string
   currentStopName: string | null
   nextStopName: string | null
-  direction: Direction
+  direction: Direction | null
   currentLatitude: number
   currentLongitude: number
 }
