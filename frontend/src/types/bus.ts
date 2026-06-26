@@ -11,6 +11,19 @@ export type EventType =
 
 export type Severity = 'LOW' | 'MEDIUM' | 'HIGH'
 
+export interface EventSummary {
+  id: number
+  busId: number
+  busNumber: string
+  routeNumber: string
+  routeName: string
+  eventType: EventType
+  severity: Severity
+  latitude: number
+  longitude: number
+  occurredAt: string
+}
+
 export interface BusSummary {
   id: number
   busNumber: string

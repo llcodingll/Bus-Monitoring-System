@@ -4,3 +4,11 @@ export interface BaseResponse<T> {
   message: string
   result: T
 }
+
+export interface PageResult<T> {
+  content: T[]
+  totalElements: number
+  totalPages: number
+  currentPage: number
+  size: number
+}
