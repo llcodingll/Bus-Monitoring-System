@@ -3,7 +3,7 @@ package com.bus.monitoringsystem.api.bus.service;
 import com.bus.monitoringsystem.api.bus.dto.response.BusSummaryResponse;
 import com.bus.monitoringsystem.api.bus.dto.result.BusSummaryResult;
 import com.bus.monitoringsystem.api.bus.model.Bus;
-import com.bus.monitoringsystem.api.bus.model.BusStatus;
+import com.bus.monitoringsystem.api.bus.policy.OnlineStatusPolicy;
 import com.bus.monitoringsystem.api.bus.repository.BusRepository;
 import com.bus.monitoringsystem.api.dispatch.model.BusDispatch;
 import com.bus.monitoringsystem.api.dispatch.repository.BusDispatchRepository;
@@ -11,33 +11,30 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toMap;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class BusService {
 
-    private static final int ONLINE_THRESHOLD_MINUTES = 5;
-
     private final BusRepository busRepository;
     private final BusDispatchRepository busDispatchRepository;
+    private final OnlineStatusPolicy onlineStatusPolicy;
 
-    /**
-     * 전체 버스 요약 정보를 반환한다.
-     *
-     * @return 버스 요약 응답 목록
-     */
     public List<BusSummaryResponse> findAllBusSummaries() {
 
         List<Bus> buses = busRepository.findAllWithStops();
         Map<Long, BusDispatch> activeDispatchByBusId = buildActiveDispatchMap();
+        Instant now = Instant.now();
 
         return buses.stream()
-                .map(bus -> toResult(bus, activeDispatchByBusId.get(bus.getId())))
+                .map(bus -> toResult(bus, activeDispatchByBusId.get(bus.getId()), now))
                 .map(BusSummaryResponse::from)
                 .toList();
     }
@@ -45,10 +42,14 @@ public class BusService {
     private Map<Long, BusDispatch> buildActiveDispatchMap() {
 
         return busDispatchRepository.findAllActiveWithRoute().stream()
-                .collect(Collectors.toMap(d -> d.getBus().getId(), d -> d));
+                .collect(toMap(d -> d.getBus().getId(), d -> d));
     }
 
-    private BusSummaryResult toResult(Bus bus, BusDispatch dispatch) {
+    private BusSummaryResult toResult(Bus bus, BusDispatch dispatch, Instant now) {
+
+        Instant lastCommunicatedAt = bus.getLastCommunicationAt() != null
+                ? bus.getLastCommunicationAt().atZone(ZoneId.systemDefault()).toInstant()
+                : null;
 
         return BusSummaryResult.builder()
                 .id(bus.getId())
@@ -56,7 +57,7 @@ public class BusService {
                 .routeNumber(dispatch != null ? dispatch.getRoute().getRouteNumber() : null)
                 .routeName(dispatch != null ? dispatch.getRoute().getRouteName() : null)
                 .currentSpeed(bus.getCurrentSpeed())
-                .status(computeStatus(bus.getLastCommunicationAt()))
+                .status(onlineStatusPolicy.resolve(lastCommunicatedAt, now))
                 .lastCommunicationAt(bus.getLastCommunicationAt())
                 .currentStopName(bus.getCurrentStop() != null ? bus.getCurrentStop().getStopName() : null)
                 .nextStopName(bus.getNextStop() != null ? bus.getNextStop().getStopName() : null)
@@ -64,14 +65,5 @@ public class BusService {
                 .currentLatitude(bus.getCurrentLatitude())
                 .currentLongitude(bus.getCurrentLongitude())
                 .build();
-    }
-
-    private BusStatus computeStatus(LocalDateTime lastCommunicationAt) {
-
-        if (lastCommunicationAt == null) {
-            return BusStatus.OFFLINE;
-        }
-        return lastCommunicationAt.isAfter(LocalDateTime.now().minusMinutes(ONLINE_THRESHOLD_MINUTES))
-                ? BusStatus.ONLINE : BusStatus.OFFLINE;
     }
 }
