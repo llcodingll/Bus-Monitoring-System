@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class BusService {
 
-    private static final int ONLINE_THRESHOLD_MINUTES = 3;
+    private static final int ONLINE_THRESHOLD_MINUTES = 5;
 
     private final BusRepository busRepository;
     private final BusDispatchRepository busDispatchRepository;
