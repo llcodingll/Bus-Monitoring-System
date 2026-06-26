@@ -10,4 +10,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     @Query("SELECT e FROM Event e JOIN FETCH e.bus JOIN FETCH e.route ORDER BY e.occurredAt DESC")
     Page<Event> findAllWithBusAndRoute(Pageable pageable);
+
+    @Query("SELECT e FROM Event e JOIN FETCH e.bus JOIN FETCH e.route WHERE e.bus.id = :busId ORDER BY e.occurredAt DESC")
+    Page<Event> findAllByBusIdWithBusAndRoute(Long busId, Pageable pageable);
 }
