@@ -2,7 +2,7 @@
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import type { BusSummary } from '@/types/bus'
 
-const props = defineProps<{
+defineProps<{
   bus: BusSummary
   selected?: boolean
 }>()
