@@ -64,4 +64,16 @@ public class Bus {
         this.lastCommunicationAt = lastCommunicationAt;
         this.createdAt = LocalDateTime.now();
     }
+
+    public void updateLocation(BigDecimal latitude, BigDecimal longitude,
+                               int speed, Stop currentStop, Stop nextStop,
+                               LocalDateTime communicatedAt) {
+
+        this.currentLatitude = latitude;
+        this.currentLongitude = longitude;
+        this.currentSpeed = speed;
+        this.currentStop = currentStop;
+        this.nextStop = nextStop;
+        this.lastCommunicationAt = communicatedAt;
+    }
 }

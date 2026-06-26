@@ -10,4 +10,14 @@ public interface BusDispatchRepository extends JpaRepository<BusDispatch, Long> 
 
     @Query("SELECT d FROM BusDispatch d JOIN FETCH d.route WHERE d.operationEndedAt IS NULL")
     List<BusDispatch> findAllActiveWithRoute();
+
+    @Query("""
+            SELECT d FROM BusDispatch d
+            JOIN FETCH d.route
+            JOIN FETCH d.bus b
+            LEFT JOIN FETCH b.currentStop
+            LEFT JOIN FETCH b.nextStop
+            WHERE d.operationEndedAt IS NULL
+            """)
+    List<BusDispatch> findAllActiveWithBusAndStops();
 }
