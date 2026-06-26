@@ -39,6 +39,12 @@ export interface BusSummary {
   currentLongitude: number
 }
 
+export interface GpsPoint {
+  latitude: number
+  longitude: number
+  recordedAt: string
+}
+
 export interface BusDetail {
   id: number
   busNumber: string

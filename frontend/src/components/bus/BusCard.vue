@@ -44,10 +44,21 @@ function formatLastSeen(isoString: string): string {
 
     <div class="mt-3 flex items-center gap-1 text-xs text-label-secondary">
       <span
-        class="inline-block max-w-[7.5rem] truncate rounded-badge bg-surface px-1.5 py-0.5 font-medium text-label"
+        v-if="bus.direction"
+        class="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold"
+        :class="bus.direction === 'OUTBOUND' ? 'bg-blue-50 text-apple-blue' : 'bg-orange-50 text-orange-500'"
+      >{{ bus.direction === 'OUTBOUND' ? '하행 ↓' : '상행 ↑' }}</span>
+      <span
+        class="inline-block max-w-[6rem] truncate rounded-badge bg-surface px-1.5 py-0.5 font-medium text-label"
       >{{ bus.currentStopName ?? '-' }}</span>
       <span class="shrink-0 text-label-tertiary">→</span>
-      <span class="truncate">{{ bus.nextStopName ?? '-' }}</span>
+      <span class="flex min-w-0 items-center gap-0.5">
+        <svg class="h-3 w-3 shrink-0 text-label-tertiary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+        </svg>
+        <span class="truncate">{{ bus.nextStopName ?? '-' }}</span>
+      </span>
     </div>
 
     <div class="mt-3 flex items-center justify-between border-t border-separator pt-3">

@@ -36,8 +36,8 @@ onMounted(async () => {
           <StatCard label="금일 이벤트" value="5" sub="위험 운행 감지" />
         </div>
 
-        <!-- Loading -->
-        <div v-if="store.loading" class="flex flex-1 items-center justify-center">
+        <!-- Loading (초기 로딩 시에만 표시 — 폴링 갱신 시 BusMap 언마운트 방지) -->
+        <div v-if="store.loading && store.buses.length === 0" class="flex flex-1 items-center justify-center">
           <div class="text-center">
             <div class="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-apple-blue border-t-transparent"></div>
             <p class="mt-3 text-sm text-label-secondary">데이터를 불러오는 중...</p>

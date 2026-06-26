@@ -1,6 +1,7 @@
 package com.bus.monitoringsystem.api.bus.controller;
 
 import com.bus.monitoringsystem.api.bus.dto.response.BusDetailResponse;
+import com.bus.monitoringsystem.api.bus.dto.response.BusPathPointResponse;
 import com.bus.monitoringsystem.api.bus.dto.response.BusSummaryResponse;
 import com.bus.monitoringsystem.api.bus.service.BusService;
 import com.bus.monitoringsystem.api.event.dto.response.EventSummaryResponse;
@@ -32,6 +33,13 @@ public class BusController {
     public ResponseEntity<BaseResponse<BusDetailResponse>> findBusDetail(@PathVariable Long id) {
 
         BusDetailResponse result = busService.findDetail(id);
+        return ResponseEntity.ok(BaseResponse.success(result));
+    }
+
+    @GetMapping("/{id}/path")
+    public ResponseEntity<BaseResponse<List<BusPathPointResponse>>> findBusPath(@PathVariable Long id) {
+
+        List<BusPathPointResponse> result = busService.findBusPath(id);
         return ResponseEntity.ok(BaseResponse.success(result));
     }
 

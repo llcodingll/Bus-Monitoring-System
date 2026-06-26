@@ -1,14 +1,17 @@
 package com.bus.monitoringsystem.api.bus.service;
 
 import com.bus.monitoringsystem.api.bus.dto.response.BusDetailResponse;
+import com.bus.monitoringsystem.api.bus.dto.response.BusPathPointResponse;
 import com.bus.monitoringsystem.api.bus.dto.response.BusSummaryResponse;
 import com.bus.monitoringsystem.api.bus.dto.result.BusDetailResult;
+import com.bus.monitoringsystem.api.bus.dto.result.BusPathPointResult;
 import com.bus.monitoringsystem.api.bus.dto.result.BusSummaryResult;
 import com.bus.monitoringsystem.api.bus.model.Bus;
 import com.bus.monitoringsystem.api.bus.policy.OnlineStatusPolicy;
 import com.bus.monitoringsystem.api.bus.repository.BusRepository;
 import com.bus.monitoringsystem.api.dispatch.model.BusDispatch;
 import com.bus.monitoringsystem.api.dispatch.repository.BusDispatchRepository;
+import com.bus.monitoringsystem.api.gps.repository.GpsLocationRepository;
 import com.bus.monitoringsystem.common.BaseException;
 import com.bus.monitoringsystem.common.BaseResponseStatus;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,7 @@ public class BusService {
 
     private final BusRepository busRepository;
     private final BusDispatchRepository busDispatchRepository;
+    private final GpsLocationRepository gpsLocationRepository;
     private final OnlineStatusPolicy onlineStatusPolicy;
 
     public List<BusSummaryResponse> findAllBusSummaries() {
@@ -81,6 +85,14 @@ public class BusService {
                 .build();
 
         return BusDetailResponse.from(result);
+    }
+
+    public List<BusPathPointResponse> findBusPath(Long busId) {
+
+        return gpsLocationRepository.findTop50ByBusIdOrderByRecordedAtDesc(busId).stream()
+                .map(BusPathPointResult::from)
+                .map(BusPathPointResponse::from)
+                .toList();
     }
 
     private BusSummaryResult toResult(Bus bus, BusDispatch dispatch, Instant now) {
