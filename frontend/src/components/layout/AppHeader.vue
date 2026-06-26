@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useCurrentTime } from '@/composables/useCurrentTime'
+import { RouterLink } from 'vue-router'
 
 const { currentTime } = useCurrentTime()
 </script>
@@ -20,6 +21,22 @@ const { currentTime } = useCurrentTime()
       </div>
 
       <div class="flex items-center gap-4">
+        <nav class="flex items-center gap-1">
+          <RouterLink
+            to="/"
+            class="rounded-lg px-3 py-1.5 text-sm font-medium text-label-secondary transition-colors hover:bg-surface hover:text-label"
+            active-class="bg-surface text-label"
+          >
+            대시보드
+          </RouterLink>
+          <RouterLink
+            to="/events"
+            class="rounded-lg px-3 py-1.5 text-sm font-medium text-label-secondary transition-colors hover:bg-surface hover:text-label"
+            active-class="bg-surface text-label"
+          >
+            이벤트
+          </RouterLink>
+        </nav>
         <div class="flex items-center gap-1.5 text-xs text-label-secondary">
           <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-apple-green"></span>
           실시간 업데이트 중
