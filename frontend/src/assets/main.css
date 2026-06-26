@@ -1,1 +1,44 @@
 @import "tailwindcss";
+
+@theme {
+  /* Apple 시스템 강조색 */
+  --color-apple-blue: #007AFF;
+  --color-apple-green: #34C759;
+  --color-apple-red: #FF3B30;
+  --color-apple-orange: #FF9500;
+  --color-apple-yellow: #FFCC00;
+
+  /* 배경 */
+  --color-surface: #F2F2F7;
+  --color-card: #FFFFFF;
+
+  /* 텍스트 */
+  --color-label: #1C1C1E;
+  --color-label-secondary: #8E8E93;
+  --color-label-tertiary: #C7C7CC;
+
+  /* 구분선 */
+  --color-separator: #E5E5EA;
+
+  /* 폰트 */
+  --font-family-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+    system-ui, sans-serif;
+
+  /* 모서리 */
+  --radius-card: 16px;
+  --radius-button: 12px;
+  --radius-badge: 6px;
+
+  /* 그림자 */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-label);
+    font-family: var(--font-family-apple);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
