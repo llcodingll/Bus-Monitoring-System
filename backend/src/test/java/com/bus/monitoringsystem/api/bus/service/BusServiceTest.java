@@ -123,13 +123,12 @@ class BusServiceTest {
         given(route.getRouteName()).willReturn("143번");
 
         BusDispatch dispatch = mock(BusDispatch.class);
-        given(dispatch.getBus()).willReturn(bus);
         given(dispatch.getRoute()).willReturn(route);
         given(dispatch.getDirection()).willReturn(Direction.OUTBOUND);
         given(dispatch.getOperationStartedAt()).willReturn(LocalDateTime.now().minusHours(1));
 
         given(busRepository.findByIdWithStops(1L)).willReturn(Optional.of(bus));
-        given(busDispatchRepository.findAllActiveWithRoute()).willReturn(List.of(dispatch));
+        given(busDispatchRepository.findActiveByBusId(1L)).willReturn(Optional.of(dispatch));
         given(onlineStatusPolicy.resolve(any(), any())).willReturn(BusStatus.ONLINE);
 
         // when
@@ -174,7 +173,7 @@ class BusServiceTest {
         given(bus.getCurrentLongitude()).willReturn(null);
 
         given(busRepository.findByIdWithStops(2L)).willReturn(Optional.of(bus));
-        given(busDispatchRepository.findAllActiveWithRoute()).willReturn(List.of());
+        given(busDispatchRepository.findActiveByBusId(2L)).willReturn(Optional.empty());
         given(onlineStatusPolicy.resolve(any(), any())).willReturn(BusStatus.OFFLINE);
 
         // when

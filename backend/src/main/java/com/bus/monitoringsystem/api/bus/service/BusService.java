@@ -58,10 +58,7 @@ public class BusService {
         Bus bus = busRepository.findByIdWithStops(id)
                 .orElseThrow(() -> new BaseException(BaseResponseStatus.BUS_NOT_FOUND));
 
-        BusDispatch dispatch = busDispatchRepository.findAllActiveWithRoute().stream()
-                .filter(d -> d.getBus().getId().equals(id))
-                .findFirst()
-                .orElse(null);
+        BusDispatch dispatch = busDispatchRepository.findActiveByBusId(id).orElse(null);
 
         Instant now = Instant.now();
         Instant lastCommunicatedAt = bus.getLastCommunicationAt() != null

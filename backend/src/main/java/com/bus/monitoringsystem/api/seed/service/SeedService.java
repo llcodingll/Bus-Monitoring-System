@@ -16,6 +16,9 @@ import com.bus.monitoringsystem.api.routestop.model.Direction;
 import com.bus.monitoringsystem.api.routestop.model.RouteStop;
 import com.bus.monitoringsystem.api.routestop.repository.RouteStopRepository;
 import com.bus.monitoringsystem.api.seed.dto.result.SeedResult;
+import com.bus.monitoringsystem.api.simulator.BusSimulationScheduler;
+import com.bus.monitoringsystem.api.simulator.cache.ActiveDispatchCache;
+import com.bus.monitoringsystem.api.simulator.cache.RouteStopCache;
 import com.bus.monitoringsystem.api.stop.model.Stop;
 import com.bus.monitoringsystem.api.stop.repository.StopRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +44,9 @@ public class SeedService {
     private final BusDispatchRepository busDispatchRepository;
     private final GpsLocationRepository gpsLocationRepository;
     private final EventRepository eventRepository;
+    private final ActiveDispatchCache activeDispatchCache;
+    private final RouteStopCache routeStopCache;
+    private final BusSimulationScheduler busSimulationScheduler;
 
     @Transactional
     public SeedResult seed() {
@@ -54,6 +60,10 @@ public class SeedService {
         Map<String, BusDispatch> dispatches = insertDispatches(buses, routes);
         insertGpsLocations(buses, dispatches);
         List<Event> events = insertEvents(buses, dispatches, routes);
+
+        busSimulationScheduler.clearState();
+        activeDispatchCache.load();
+        routeStopCache.load();
 
         return SeedResult.builder()
                 .busCount(buses.size())

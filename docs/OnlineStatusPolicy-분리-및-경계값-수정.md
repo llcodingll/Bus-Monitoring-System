@@ -18,9 +18,15 @@ lastCommunicatedAt.isAfter(now.minus(THRESHOLD))
 
 **수정 후:**
 ```java
-!lastCommunicatedAt.isBefore(now.minus(THRESHOLD))
+Duration elapsed = Duration.between(lastCommunicatedAt, now);
+return elapsed.compareTo(THRESHOLD) <= 0 ? BusStatus.ONLINE : BusStatus.OFFLINE;
 ```
-`!isBefore`는 inclusive 비교이므로 정확히 5분 경과 시 `true` → **ONLINE** (정확)
+`Duration.compareTo()` 는 나노초 단위로 경과 시간을 비교한다.
+`toMinutes()` 방식은 5분 30초를 5분으로 truncate해 ONLINE으로 오판정하지만,
+`compareTo(THRESHOLD) <= 0` 은 1ns라도 초과하면 즉시 OFFLINE으로 처리해
+"5분 초과 OFFLINE" 요건을 완벽히 충족한다.
+clock skew로 `lastCommunicatedAt` 이 미래인 경우 elapsed가 음수가 되고,
+음수 `compareTo(양수)` 는 -1이므로 ≤ 0을 만족해 ONLINE으로 안전하게 처리된다.
 
 ### 2. 인라인 로직 분리
 
