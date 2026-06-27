@@ -16,7 +16,7 @@ public class OnlineStatusPolicy {
         if (lastCommunicatedAt == null) {
             return BusStatus.OFFLINE;
         }
-        return !lastCommunicatedAt.isBefore(now.minus(THRESHOLD))
-                ? BusStatus.ONLINE : BusStatus.OFFLINE;
+        Duration elapsed = Duration.between(lastCommunicatedAt, now);
+        return elapsed.compareTo(THRESHOLD) <= 0 ? BusStatus.ONLINE : BusStatus.OFFLINE;
     }
 }
