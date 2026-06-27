@@ -7,7 +7,7 @@ import BusMap from '@/components/bus/BusMap.vue'
 import { useBusStore } from '@/stores/bus'
 import { usePolling } from '@/composables/usePolling'
 
-const POLLING_INTERVAL_MS = 30_000
+const POLLING_INTERVAL_MS = 7_000
 
 const store = useBusStore()
 const selectedBusId = ref<number | null>(null)

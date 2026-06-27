@@ -7,8 +7,8 @@ import { fetchBusPath } from '@/api/buses'
 
 const SEOUL_CENTER: [number, number] = [37.5665, 126.9780]
 const DEFAULT_ZOOM = 12
-const ANIMATION_DURATION_MS = 30_000
-const ANIMATION_STEP_MS = 500
+const ANIMATION_DURATION_MS = 7_000
+const ANIMATION_STEP_MS = 200
 
 const props = defineProps<{
   buses: BusSummary[]
