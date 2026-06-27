@@ -5,17 +5,20 @@ import StatCard from '@/components/common/StatCard.vue'
 import BusListPanel from '@/components/bus/BusListPanel.vue'
 import BusMap from '@/components/bus/BusMap.vue'
 import { useBusStore } from '@/stores/bus'
+import { useEventStore } from '@/stores/event'
 import { usePolling } from '@/composables/usePolling'
 
 const POLLING_INTERVAL_MS = 7_000
 
 const store = useBusStore()
+const eventStore = useEventStore()
 const selectedBusId = ref<number | null>(null)
 
 const { start: startPolling } = usePolling(store.loadBuses, POLLING_INTERVAL_MS)
 
 onMounted(async () => {
   await store.loadBuses()
+  await eventStore.loadEvents(0)
   startPolling()
 })
 </script>
@@ -33,7 +36,7 @@ onMounted(async () => {
           <StatCard label="온라인" :value="store.onlineCount" sub="현재 운행 중" :accent="true" />
           <StatCard label="오프라인" :value="store.offlineCount"
             :sub="store.offlineCount > 0 ? '통신 이상' : '이상 없음'" />
-          <StatCard label="금일 이벤트" value="5" sub="위험 운행 감지" />
+          <StatCard label="감지 이벤트" :value="eventStore.totalElements" sub="누적 감지 건수" />
         </div>
 
         <!-- Loading (초기 로딩 시에만 표시 — 폴링 갱신 시 BusMap 언마운트 방지) -->
