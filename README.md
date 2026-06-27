@@ -122,5 +122,9 @@ BusSimulationScheduler (7초 tick)
 │       ├── components/   BusMap, BusList, BusEventList
 │       └── stores/       bus, event (Pinia)
 └── docs/             설계 문서
-    └── 설계.md       ERD · 인덱스 전략 · 확장 방안
+    └── 설계.md       ERD · 시스템 구조 · 인덱스 전략 · 확장 방안
 ```
+
+---
+
+상세 설계 결정 사항은 [docs/설계.md](docs/설계.md)를 참조하세요.
