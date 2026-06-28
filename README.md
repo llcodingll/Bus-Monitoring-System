@@ -8,7 +8,7 @@
 
 | 영역 | 기술 |
 |------|------|
-| Backend | Spring Boot 3.x · Java 17 · JPA · PostgreSQL 16 |
+| Backend | Spring Boot 4.x · Java 17 · JPA · PostgreSQL 16 |
 | Frontend | Vue 3 (Composition API) · TypeScript · Pinia · Tailwind CSS v4 · Leaflet |
 | Infrastructure | Docker Compose |
 
@@ -45,7 +45,7 @@ curl -X POST http://localhost/api/seed
 - **버스 목록**: 버스번호 · 노선명 · 현재속도 · ONLINE/OFFLINE 상태 실시간 표시
 - **버스 상세**: 현재 정류장 · 다음 정류장 · 운행방향 · 마지막 통신시간
 - **지도**: Leaflet 기반 버스 위치 마커 · 7초 주기 부드러운 애니메이션 · 최근 이동 경로 폴리라인
-- **이벤트 목록**: 급정거 · 급가속 · 급감속 · 급출발 · 충격 감지 이벤트 실시간 조회
+- **이벤트 목록**: 급정거 · 급가속 · 급감속 · 급출발 · 충격 감지 이벤트 실시간 조회 · 유형 및 심각도 필터링
 - **온라인 상태 판정**: 마지막 통신시간 기준 5분 초과 → OFFLINE, 5분 이내 → ONLINE
 
 ### API 엔드포인트
@@ -55,7 +55,8 @@ curl -X POST http://localhost/api/seed
 | GET | `/api/buses` | 버스 목록 |
 | GET | `/api/buses/{id}` | 버스 상세 |
 | GET | `/api/buses/{id}/path` | 최근 GPS 이력 (최대 50건) |
-| GET | `/api/events` | 전체 이벤트 목록 |
+| GET | `/api/buses/{id}/events` | 버스별 이벤트 목록 |
+| GET | `/api/events` | 전체 이벤트 목록 (`?eventType=`, `?severity=` 필터 지원) |
 | POST | `/api/seed` | Mock 데이터 초기화 |
 
 ---
@@ -80,7 +81,7 @@ WebSocket은 연결 수 관리, 재연결 로직, 스케일아웃 시 Sticky Ses
 
 ### 인덱스 · N+1 방지 · 현재상태 비정규화
 
-**인덱스**: `gps_locations` 테이블에 `(bus_id, recorded_at DESC)` 복합 인덱스를 적용했습니다. `bus_dispatches` 테이블에는 `(operation_ended_at, bus_id, route_id, direction)` 인덱스를 두어 현재 운행 중 배차 조회(`IS NULL` 필터 + 버스 ID 매칭)를 인덱스 전용 스캔으로 처리합니다.
+**인덱스**: `gps_locations`에 `(bus_id, recorded_at DESC)`, `bus_dispatches`에 `(operation_ended_at, bus_id, route_id, direction)` 복합 인덱스를 적용했습니다. `events` 테이블에는 조회 패턴별로 `(bus_id, occurred_at DESC)`, `(event_type, occurred_at DESC)`, `(severity, occurred_at DESC)` 인덱스 3종을 추가해 버스별·유형별·심각도별 필터 조회를 모두 인덱스 스캔으로 처리합니다.
 
 **N+1 방지**: 버스 목록 조회(`GET /api/buses`)는 버스 전체와 현재·다음 정류장을 `LEFT JOIN FETCH` 단일 쿼리로 로드합니다. 버스 상세의 배차 정보는 `findActiveByBusId()` 단건 쿼리로 전체 로드 후 Java 필터링 방식을 교체했습니다.
 
@@ -92,12 +93,13 @@ WebSocket은 연결 수 관리, 재연결 로직, 스케일아웃 시 Sticky Ses
 
 ```
 BusSimulationScheduler (7초 tick)
-  └─ ActiveDispatchCache    ← 운행 중 배차 정보 인메모리 캐시 (정적 데이터 DB 조회 제거)
-  └─ RouteStopCache         ← 노선·정류장 정보 3단계 HashMap 캐시
-  └─ BusTickProcessor       ← 버스별 REQUIRES_NEW 트랜잭션 (단일 실패가 전체 tick에 전파되지 않음)
-       ├─ GPS INSERT
-       ├─ Bus.updateLocation() (Dirty Checking)
-       └─ 이벤트 감지 (가속도 임계값 기반 룰베이스)
+  ├─ ActiveDispatchCache       ← 운행 중 배차 정보 인메모리 캐시 (DB 조회 없음)
+  ├─ RouteStopCache            ← 노선·정류장 정보 3단계 HashMap 캐시
+  └─ ExecutorService.invokeAll() — 버스별 병렬 실행 (고정 스레드풀)
+       └─ BusTickProcessor     ← 버스별 REQUIRES_NEW 트랜잭션 (단일 실패가 전체 tick에 전파되지 않음)
+            ├─ GPS INSERT
+            ├─ Bus.updateLocation() (Dirty Checking)
+            └─ 이벤트 감지 (가속도 임계값 기반 룰베이스)
 ```
 
 - **이벤트 감지**: 속도 변화량(m/s²)이 임계값을 초과하면 급정거·급가속·급감속·급출발로 분류, 무작위 확률로 충격 이벤트 발생
