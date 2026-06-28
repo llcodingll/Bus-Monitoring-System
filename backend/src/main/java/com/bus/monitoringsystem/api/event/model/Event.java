@@ -14,7 +14,11 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "events",
-        indexes = @Index(name = "idx_events_bus_occurred", columnList = "bus_id, occurred_at DESC"))
+        indexes = {
+                @Index(name = "idx_events_bus_occurred",      columnList = "bus_id, occurred_at DESC"),
+                @Index(name = "idx_events_type_occurred",     columnList = "event_type, occurred_at DESC"),
+                @Index(name = "idx_events_severity_occurred", columnList = "severity, occurred_at DESC")
+        })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Event {

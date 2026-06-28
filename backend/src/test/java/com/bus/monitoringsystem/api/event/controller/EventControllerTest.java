@@ -59,18 +59,18 @@ class EventControllerTest {
                 .size(20)
                 .build();
 
-        given(eventService.findRecentEvents(0, 20)).willReturn(page);
+        given(eventService.findRecentEvents(null, null, 0, 20)).willReturn(page);
 
         // when
         ResponseEntity<BaseResponse<PageResponse<EventSummaryResponse>>> result =
-                eventController.findRecentEvents(0, 20);
+                eventController.findRecentEvents(null, null, 0, 20);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(result.getBody()).isNotNull();
         assertThat(result.getBody().getResult().getContent()).hasSize(1);
         assertThat(result.getBody().getResult().getTotalElements()).isEqualTo(1);
-        then(eventService).should().findRecentEvents(0, 20);
+        then(eventService).should().findRecentEvents(null, null, 0, 20);
     }
 
     @Test
@@ -86,11 +86,11 @@ class EventControllerTest {
                 .size(20)
                 .build();
 
-        given(eventService.findRecentEvents(0, 20)).willReturn(emptyPage);
+        given(eventService.findRecentEvents(null, null, 0, 20)).willReturn(emptyPage);
 
         // when
         ResponseEntity<BaseResponse<PageResponse<EventSummaryResponse>>> result =
-                eventController.findRecentEvents(0, 20);
+                eventController.findRecentEvents(null, null, 0, 20);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);

@@ -7,6 +7,9 @@ import InfoRow from '@/components/common/InfoRow.vue'
 import SeverityBadge from '@/components/common/SeverityBadge.vue'
 import EventTypeLabel from '@/components/common/EventTypeLabel.vue'
 import { useBusStore } from '@/stores/bus'
+import { usePolling } from '@/composables/usePolling'
+
+const POLLING_INTERVAL_MS = 7_000
 
 const route = useRoute()
 const router = useRouter()
@@ -14,9 +17,12 @@ const store = useBusStore()
 
 const busId = Number(route.params.id)
 
+const { start: startPolling } = usePolling(() => store.loadBusDetail(busId), POLLING_INTERVAL_MS)
+
 onMounted(async () => {
   await store.loadBusDetail(busId)
   await store.loadBusEvents(busId, 0)
+  startPolling()
 })
 
 const bus = computed(() => store.currentBus)

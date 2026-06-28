@@ -132,14 +132,14 @@ class BusControllerTest {
                 .size(10)
                 .build();
 
-        given(eventService.findRecentEventsByBusId(1L, 0, 10)).willReturn(pageResponse);
+        given(eventService.findRecentEventsByBusId(1L, null, null, 0, 10)).willReturn(pageResponse);
 
         // when
-        ResponseEntity<BaseResponse<PageResponse<EventSummaryResponse>>> result = busController.findBusEvents(1L, 0, 10);
+        ResponseEntity<BaseResponse<PageResponse<EventSummaryResponse>>> result = busController.findBusEvents(1L, null, null, 0, 10);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(result.getBody()).isNotNull();
-        then(eventService).should().findRecentEventsByBusId(1L, 0, 10);
+        then(eventService).should().findRecentEventsByBusId(1L, null, null, 0, 10);
     }
 }

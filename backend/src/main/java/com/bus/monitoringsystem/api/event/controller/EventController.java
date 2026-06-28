@@ -1,6 +1,8 @@
 package com.bus.monitoringsystem.api.event.controller;
 
 import com.bus.monitoringsystem.api.event.dto.response.EventSummaryResponse;
+import com.bus.monitoringsystem.api.event.model.EventType;
+import com.bus.monitoringsystem.api.event.model.Severity;
 import com.bus.monitoringsystem.api.event.service.EventService;
 import com.bus.monitoringsystem.common.BaseResponse;
 import com.bus.monitoringsystem.common.PageResponse;
@@ -20,10 +22,12 @@ public class EventController {
 
     @GetMapping
     public ResponseEntity<BaseResponse<PageResponse<EventSummaryResponse>>> findRecentEvents(
+            @RequestParam(required = false) EventType eventType,
+            @RequestParam(required = false) Severity severity,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        PageResponse<EventSummaryResponse> result = eventService.findRecentEvents(page, size);
+        PageResponse<EventSummaryResponse> result = eventService.findRecentEvents(eventType, severity, page, size);
         return ResponseEntity.ok(BaseResponse.success(result));
     }
 }

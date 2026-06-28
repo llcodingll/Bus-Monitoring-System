@@ -1,13 +1,30 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import SeverityBadge from '@/components/common/SeverityBadge.vue'
 import EventTypeLabel from '@/components/common/EventTypeLabel.vue'
 import { useEventStore } from '@/stores/event'
+import type { EventType, Severity } from '@/types/bus'
 
 const store = useEventStore()
 
+const selectedEventType = ref<EventType | ''>('')
+const selectedSeverity = ref<Severity | ''>('')
+
 onMounted(() => store.loadEvents(0))
+
+function applyFilters(): void {
+  store.applyFilters(
+    selectedEventType.value || null,
+    selectedSeverity.value || null,
+  )
+}
+
+function resetFilters(): void {
+  selectedEventType.value = ''
+  selectedSeverity.value = ''
+  store.applyFilters(null, null)
+}
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleString('ko-KR', {
@@ -31,6 +48,37 @@ function formatDate(iso: string): string {
           <div>
             <h2 class="text-[17px] font-bold text-label">이벤트 목록</h2>
             <p class="mt-0.5 text-xs text-label-secondary">총 {{ store.totalElements }}건</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <select
+              v-model="selectedEventType"
+              class="rounded-button border border-separator bg-card px-3 py-1.5 text-sm text-label focus:outline-none"
+              @change="applyFilters"
+            >
+              <option value="">유형 전체</option>
+              <option value="SUDDEN_BRAKE">급정거</option>
+              <option value="SUDDEN_ACCELERATION">급가속</option>
+              <option value="SUDDEN_START">급출발</option>
+              <option value="SUDDEN_DECELERATION">급감속</option>
+              <option value="IMPACT">충격</option>
+            </select>
+            <select
+              v-model="selectedSeverity"
+              class="rounded-button border border-separator bg-card px-3 py-1.5 text-sm text-label focus:outline-none"
+              @change="applyFilters"
+            >
+              <option value="">심각도 전체</option>
+              <option value="HIGH">높음</option>
+              <option value="MEDIUM">보통</option>
+              <option value="LOW">낮음</option>
+            </select>
+            <button
+              v-if="selectedEventType || selectedSeverity"
+              class="rounded-button px-3 py-1.5 text-sm text-label-secondary hover:text-label"
+              @click="resetFilters"
+            >
+              초기화
+            </button>
           </div>
         </div>
 
