@@ -63,16 +63,16 @@ class EventServiceTest {
                 .build();
 
         PageRequest pageable = PageRequest.of(0, 20);
-        given(eventRepository.findAllWithBusAndRoute(any())).willReturn(new PageImpl<>(List.of(event), pageable, 1));
+        given(eventRepository.findAllWithFilters(any(), any(), any())).willReturn(new PageImpl<>(List.of(event), pageable, 1));
 
         // when
-        PageResponse<EventSummaryResponse> result = eventService.findRecentEvents(0, 20);
+        PageResponse<EventSummaryResponse> result = eventService.findRecentEvents(null, null, 0, 20);
 
         // then
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getCurrentPage()).isEqualTo(0);
-        then(eventRepository).should().findAllWithBusAndRoute(any());
+        then(eventRepository).should().findAllWithFilters(any(), any(), any());
     }
 
     @Test
@@ -81,10 +81,10 @@ class EventServiceTest {
 
         // given
         PageRequest pageable = PageRequest.of(0, 20);
-        given(eventRepository.findAllWithBusAndRoute(any())).willReturn(new PageImpl<>(List.of(), pageable, 0));
+        given(eventRepository.findAllWithFilters(any(), any(), any())).willReturn(new PageImpl<>(List.of(), pageable, 0));
 
         // when
-        PageResponse<EventSummaryResponse> result = eventService.findRecentEvents(0, 20);
+        PageResponse<EventSummaryResponse> result = eventService.findRecentEvents(null, null, 0, 20);
 
         // then
         assertThat(result.getContent()).isEmpty();

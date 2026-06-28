@@ -5,6 +5,8 @@ import com.bus.monitoringsystem.api.bus.dto.response.BusPathPointResponse;
 import com.bus.monitoringsystem.api.bus.dto.response.BusSummaryResponse;
 import com.bus.monitoringsystem.api.bus.service.BusService;
 import com.bus.monitoringsystem.api.event.dto.response.EventSummaryResponse;
+import com.bus.monitoringsystem.api.event.model.EventType;
+import com.bus.monitoringsystem.api.event.model.Severity;
 import com.bus.monitoringsystem.api.event.service.EventService;
 import com.bus.monitoringsystem.common.BaseResponse;
 import com.bus.monitoringsystem.common.PageResponse;
@@ -46,10 +48,12 @@ public class BusController {
     @GetMapping("/{id}/events")
     public ResponseEntity<BaseResponse<PageResponse<EventSummaryResponse>>> findBusEvents(
             @PathVariable Long id,
+            @RequestParam(required = false) EventType eventType,
+            @RequestParam(required = false) Severity severity,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        PageResponse<EventSummaryResponse> result = eventService.findRecentEventsByBusId(id, page, size);
+        PageResponse<EventSummaryResponse> result = eventService.findRecentEventsByBusId(id, eventType, severity, page, size);
         return ResponseEntity.ok(BaseResponse.success(result));
     }
 }
