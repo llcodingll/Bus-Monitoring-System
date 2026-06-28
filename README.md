@@ -133,6 +133,23 @@ BusSimulationScheduler (7초 tick)
 
 ---
 
+## 기술 의사결정 기록
+
+각 의사결정의 배경과 대안 비교, 구현 세부사항을 개별 문서로 정리했습니다.
+
+| 문서 | 핵심 내용 |
+|------|-----------|
+| [폴링 기반 실시간 갱신](docs/폴링-기반-실시간-갱신.md) | WebSocket 대신 HTTP 폴링 채택 · `usePolling` composable 이중 실행 방지 · `readOnly = true` 트랜잭션 |
+| [버스 현재상태 비정규화](docs/버스-현재상태-비정규화.md) | `gps_locations` 서브쿼리 제거 · `current_stop_id/next_stop_id` FK 직접 저장 · ONLINE 상태 미저장 |
+| [버스 목록 조회 쿼리 최적화](docs/버스목록-조회-쿼리-최적화.md) | 불필요한 `JOIN FETCH d.bus` 제거 · `bus_dispatches` 복합 인덱스 추가 |
+| [GPS·이벤트 조회 최적화](docs/GPS-이벤트-조회-최적화.md) | 복합 인덱스 · 결과 50건 제한 · 이벤트 N+1 JOIN FETCH |
+| [시뮬레이터 인메모리 상태 캐싱](docs/시뮬레이터-인메모리-상태-캐싱.md) | `ActiveDispatchCache` @PostConstruct 선로드 · `stateMap` ConcurrentHashMap · `BusSimState` 불변 record |
+| [OnlineStatusPolicy 분리 및 경계값 수정](docs/OnlineStatusPolicy-분리-및-경계값-수정.md) | 경계값 버그 수정(`isBefore` → `compareTo`) · 정책 클래스 분리 · `Instant.now()` 단일화 |
+| [지도 마커 스무스 애니메이션](docs/지도-마커-스무스-애니메이션.md) | 7초 선형 보간 · 마커 DOM 재사용 · 언마운트 시 타이머 정리 |
+| [폴링 중 BusMap 언마운트 버그 수정](docs/폴링-중-BusMap-언마운트-버그-수정.md) | `store.loading && store.buses.length === 0` 조건으로 Leaflet 인스턴스 보호 |
+
+---
+
 ## 설계 질문 답변
 
 [설계-질문-답변.md](설계-질문-답변.md)
