@@ -111,7 +111,7 @@ BusSimulationScheduler (7초 tick)
 
 ```
 .
-├── backend/          Spring Boot 3.x 백엔드
+├── backend/          Spring Boot 4.x 백엔드
 │   └── src/main/java/com/bus/monitoringsystem/api/
 │       ├── bus/          버스 목록·상세 API
 │       ├── event/        이벤트 목록 API
@@ -120,8 +120,8 @@ BusSimulationScheduler (7초 tick)
 │       └── seed/         Mock 데이터 초기화
 ├── frontend/         Vue 3 프론트엔드
 │   └── src/
-│       ├── views/        DashboardView, BusDetailView
-│       ├── components/   BusMap, BusList, BusEventList
+│       ├── views/        DashboardView, BusDetailView, EventListView
+│       ├── components/   BusMap, BusListPanel, BusCard
 │       └── stores/       bus, event (Pinia)
 └── docs/             설계 문서
     └── 설계.md       ERD · 시스템 구조 · 인덱스 전략 · 확장 방안
